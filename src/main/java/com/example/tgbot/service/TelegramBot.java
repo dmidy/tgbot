@@ -34,6 +34,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                         
             Для зручності ми уже обрали стандартні пареметри, тому можете спробувати нажати на кнопку для отримання інформації.""";
 
+    static final String STEP_BACK_TEXT = """
+            Для отримання інформації нажміть - \"Отримати інформацію про валюту\". \s
+            Для налаштування - \"Налаштування\". \s
+            Якщо Вам щось не зрозуміло, натисніть будь ласка на - \"Допомога\".""";
     public TelegramBot(BotConfig config){
         this.config = config;
         List<BotCommand> listOfCommands = new ArrayList<>();
@@ -62,17 +66,33 @@ public class TelegramBot extends TelegramLongPollingBot {
             long chatId = update.getMessage().getChatId();
 
             switch (massageTest){
-                case "/start", "Назад":
+                case "/start":
                     startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     startMenu(chatId, START_TEXT);
                     break;
 
                 case "/help", "Допомога":
-                    startCommandReceived(chatId, HELP_TEXT);
+                    sendMessage(chatId, HELP_TEXT);
                     break;
 
-                case "/settings", "Настройки":
+                case "/settings", "Налаштування":
                     settingsMenu(chatId, SETTINGS_TEXT);
+                    break;
+
+                case "Назад":
+                    startMenu(chatId, STEP_BACK_TEXT);
+                    break;
+                case "Назад до налаштувань":
+                    startMenu(chatId, "🧐");
+                    break;
+                case "Банк":
+                    bankChoice(chatId, "Оберіть банк.");
+                    break;
+                case "Валюта":
+                    currencySelection(chatId, "Виберіть одну або декілька валют.");
+                    break;
+                case "Кількість знаків після коми":
+                    numberAfterPoint(chatId, "Оберіть для Вас комфортніше відображення числа.");
                     break;
                 default: sendMessage(chatId, "sorry command was not recognised");
             }
@@ -104,7 +124,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         row.add("Отримати інформацію про валюту");
         keyboardRows.add(row);
         row = new KeyboardRow();
-        row.add("Настройки");
+        row.add("Налаштування");
         row.add("Допомога");
         keyboardRows.add(row);
         keyboardMarkup.setKeyboard(keyboardRows);
@@ -146,4 +166,114 @@ public class TelegramBot extends TelegramLongPollingBot {
         }catch (TelegramApiException ignored){
         }
     }
+    private void currencySelection(long chatId, String textToSend){
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(textToSend);
+
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+
+        KeyboardRow row = new KeyboardRow();
+        row.add("USD");
+        row.add("EU");
+        row.add("PLN");
+        keyboardRows.add(row);
+
+        row = new KeyboardRow();
+        row.add("Назад до налаштувань");
+
+        keyboardRows.add(row);
+
+        keyboardMarkup.setKeyboard(keyboardRows);
+        message.setReplyMarkup(keyboardMarkup);
+
+        try {
+            execute(message);
+        }catch (TelegramApiException ignored){
+        }
+    }
+    private void bankChoice(long chatId, String textToSend){
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(textToSend);
+
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+
+        KeyboardRow row = new KeyboardRow();
+        row.add("MonoBank");
+        row.add("PrivatBank");
+        row.add("NBU");
+        keyboardRows.add(row);
+
+        row = new KeyboardRow();
+        row.add("Назад до налаштувань");
+
+        keyboardRows.add(row);
+
+        keyboardMarkup.setKeyboard(keyboardRows);
+        message.setReplyMarkup(keyboardMarkup);
+
+        try {
+            execute(message);
+        }catch (TelegramApiException ignored){
+        }
+    }
+    private void numberAfterPoint(long chatId, String textToSend){
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(textToSend);
+
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+
+        KeyboardRow row = new KeyboardRow();
+        row.add("2");
+        row.add("3");
+        row.add("4");
+        keyboardRows.add(row);
+
+        row = new KeyboardRow();
+        row.add("Назад до налаштувань");
+
+        keyboardRows.add(row);
+
+        keyboardMarkup.setKeyboard(keyboardRows);
+        message.setReplyMarkup(keyboardMarkup);
+
+        try {
+            execute(message);
+        }catch (TelegramApiException ignored){
+        }
+    }
+
+    private void notificationTimer(long chatId, String textToSend){
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(textToSend);
+
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+
+        KeyboardRow row = new KeyboardRow();
+        row.add("");
+        row.add("");
+        row.add("");
+        keyboardRows.add(row);
+
+        row = new KeyboardRow();
+        row.add("");
+
+        keyboardRows.add(row);
+
+        keyboardMarkup.setKeyboard(keyboardRows);
+        message.setReplyMarkup(keyboardMarkup);
+
+        try {
+            execute(message);
+        }catch (TelegramApiException ignored){
+        }
+    }
+
 }
