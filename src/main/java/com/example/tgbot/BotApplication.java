@@ -1,18 +1,20 @@
 package com.example.tgbot;
 
 import com.example.tgbot.config.BotConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+@Slf4j
 @SpringBootApplication
 public class BotApplication extends TelegramLongPollingBot {
 
 	final BotConfig config;
 
-	public BotApplication(BotConfig config){
+	protected BotApplication(BotConfig config){
 		this.config = config;
 	}
 
@@ -25,12 +27,11 @@ public class BotApplication extends TelegramLongPollingBot {
 			   String messageText = update.getMessage().getText();
 			   long chatId = update.getMessage().getChatId();
 
-			   switch (messageText) {
-				   case "/start": // Считываем имя и отправляем приветсвтие
-						   startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
-						   break;
-						   default: sendMessage(chatId, "Sorry, command not found");
-			   }
+               if (messageText.equals("/start")) { // Считываем имя и отправляем приветсвтие
+                   startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
+               } else {
+                   sendMessage(chatId, "Sorry, command not found");
+               }
 		   }
         }
 	}
@@ -60,7 +61,7 @@ public class BotApplication extends TelegramLongPollingBot {
 		try {
 			execute(message);
 		} catch (TelegramApiException e) {
-			throw new RuntimeException(e);
+			log.error("Error occurred: " + e.getMessage());
 		}
 	}
 
