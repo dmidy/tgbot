@@ -83,7 +83,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     startMenu(chatId, STEP_BACK_TEXT);
                     break;
                 case "Назад до налаштувань":
-                    startMenu(chatId, "🧐");
+                    settingsMenu(chatId, "🧐");
                     break;
                 case "Банк":
                     bankChoice(chatId, "Оберіть банк.");
@@ -93,6 +93,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case "Кількість знаків після коми":
                     numberAfterPoint(chatId, "Оберіть для Вас комфортніше відображення числа.");
+                    break;
+                case "Час сповіщення":
+                    notificationTimer(chatId, "Виберіть час для сповіщень.");
                     break;
                 default: sendMessage(chatId, "sorry command was not recognised");
             }
@@ -176,8 +179,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         KeyboardRow row = new KeyboardRow();
         row.add("USD");
-        row.add("EU");
-        row.add("PLN");
+        row.add("EUR");
         keyboardRows.add(row);
 
         row = new KeyboardRow();
@@ -257,14 +259,27 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<KeyboardRow> keyboardRows = new ArrayList<>();
 
         KeyboardRow row = new KeyboardRow();
-        row.add("");
-        row.add("");
-        row.add("");
+        row.add("9");
+        row.add("10");
+        row.add("11");
+        row.add("12");
+        row.add("13");
         keyboardRows.add(row);
 
         row = new KeyboardRow();
-        row.add("");
+        row.add("14");
+        row.add("15");
+        row.add("16");
+        row.add("17");
+        row.add("18");
+        keyboardRows.add(row);
 
+        row = new KeyboardRow();
+        row.add("Вимкнути сповіщення");
+        keyboardRows.add(row);
+
+        row = new KeyboardRow();
+        row.add("Назад до налаштувань");
         keyboardRows.add(row);
 
         keyboardMarkup.setKeyboard(keyboardRows);
