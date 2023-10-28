@@ -156,18 +156,18 @@ public class TelegramBot extends TelegramLongPollingBot {
                         break;
 
                 case "Кількість знаків після коми":
-                    if (twoAfterPoint)twoNumberAfterPoint(chatId, "Обрано 2 числа після коми.");
-                    if (threeAfterPoint)threeNumberAfterPoint(chatId, "Обрано 3 числа після коми.");
-                    if (fourAfterPoint)fourNumberAfterPoint(chatId, "Обрано 4 числа після коми.");
+                    if (twoAfterPoint) sendNumberAfterPoint(chatId, "Обрано 2 числа після коми.", 2);
+                    if (threeAfterPoint) sendNumberAfterPoint(chatId, "Обрано 3 числа після коми.", 3);
+                    if (fourAfterPoint) sendNumberAfterPoint(chatId, "Обрано 4 числа після коми.", 4);
                     break;
                 case "2":
-                    twoNumberAfterPoint(chatId, "Обрано 2 числа після коми.");
+                    setNumberAfterPoint(chatId, "Обрано 2 числа після коми.", 2); // Для двух чисел после точки
                     break;
                 case "3":
-                    threeNumberAfterPoint(chatId, "Обрано 3 числа після коми.");
+                    setNumberAfterPoint(chatId, "Обрано 3 числа після коми.", 3); // Для трех чисел после точки
                     break;
                 case "4":
-                    fourNumberAfterPoint(chatId, "Обрано 4 числа після коми.");
+                    setNumberAfterPoint(chatId, "Обрано 4 числа після коми.", 4); // Для четырех чисел после точки
                     break;
 
                 case "Час сповіщення":
@@ -626,28 +626,26 @@ public class TelegramBot extends TelegramLongPollingBot {
         }catch (TelegramApiException ignored){
         }
     }
-    private void twoNumberAfterPoint(long chatId, String textToSend){
-        threeAfterPoint = false;
-        fourAfterPoint = false;
-        twoAfterPoint = true;
-
-
+    private void sendNumberAfterPoint(long chatId, String textToSend, int numAfterPoint) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
+
+        twoAfterPoint = (numAfterPoint == 2);
+        threeAfterPoint = (numAfterPoint == 3);
+        fourAfterPoint = (numAfterPoint == 4);
 
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows = new ArrayList<>();
 
         KeyboardRow row = new KeyboardRow();
-        row.add("2✅");
-        row.add("3");
-        row.add("4");
+        row.add("2" + (twoAfterPoint ? "✅" : ""));
+        row.add("3" + (threeAfterPoint ? "✅" : ""));
+        row.add("4" + (fourAfterPoint ? "✅" : ""));
         keyboardRows.add(row);
 
         row = new KeyboardRow();
         row.add("Назад до налаштувань");
-
         keyboardRows.add(row);
 
         keyboardMarkup.setKeyboard(keyboardRows);
@@ -655,43 +653,14 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         try {
             execute(message);
-        }catch (TelegramApiException ignored){
+        } catch (TelegramApiException ignored) {
         }
     }
-    private void threeNumberAfterPoint(long chatId, String textToSend){
-        twoAfterPoint = false;
-        threeAfterPoint = true;
-        fourAfterPoint = false;
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(textToSend);
-
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-
-        KeyboardRow row = new KeyboardRow();
-        row.add("2");
-        row.add("3✅");
-        row.add("4");
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-        row.add("Назад до налаштувань");
-
-        keyboardRows.add(row);
-
-        keyboardMarkup.setKeyboard(keyboardRows);
-        message.setReplyMarkup(keyboardMarkup);
-
-        try {
-            execute(message);
-        }catch (TelegramApiException ignored){
-        }
-    }
-    private void fourNumberAfterPoint(long chatId, String textToSend){
+    private void setNumberAfterPoint(long chatId, String textToSend, int numAfterPoint) {
         twoAfterPoint = false;
         threeAfterPoint = false;
-        fourAfterPoint = true;
+        fourAfterPoint = false;
+
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
@@ -702,12 +671,27 @@ public class TelegramBot extends TelegramLongPollingBot {
         KeyboardRow row = new KeyboardRow();
         row.add("2");
         row.add("3");
-        row.add("4✅");
+        row.add("4");
+
+        switch (numAfterPoint) {
+            case 2:
+                twoAfterPoint = true;
+                row.set(0, "2✅");
+                break;
+            case 3:
+                threeAfterPoint = true;
+                row.set(1, "3✅");
+                break;
+            case 4:
+                fourAfterPoint = true;
+                row.set(2, "4✅");
+                break;
+        }
+
         keyboardRows.add(row);
 
         row = new KeyboardRow();
         row.add("Назад до налаштувань");
-
         keyboardRows.add(row);
 
         keyboardMarkup.setKeyboard(keyboardRows);
@@ -715,7 +699,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         try {
             execute(message);
-        }catch (TelegramApiException ignored){
+        } catch (TelegramApiException ignored) {
         }
     }
 
