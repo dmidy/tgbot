@@ -51,13 +51,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     static boolean eurChoice = false;
     static boolean usdANDeur = false;
 
-    static String getValSell = "";
-    static String getValBuy = "";
-
-    static String doneInfoSell = "";
-    static String doneInfoBuy = "";
-
-    static String alltext = "";
 
     public TelegramBot(BotConfig config){
         this.config = config;
@@ -91,24 +84,18 @@ public class TelegramBot extends TelegramLongPollingBot {
                     startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     startMenu(chatId, START_TEXT);
                     break;
-
                 case "/help", "Допомога":
                     sendMessage(chatId, HELP_TEXT);
                     break;
-
                 case "/settings", "Налаштування":
                     settingsMenu(chatId, SETTINGS_TEXT);
                     break;
-
-
-
                 case "Назад":
                     startMenu(chatId, STEP_BACK_TEXT);
                     break;
                 case "Назад до налаштувань":
                     settingsMenu(chatId, "🧐");
                     break;
-
                 case "Банк":
                     if (monoBank) bankChoiceMono(chatId, "Обрано MonoBank.");
                     if (privatBank) bankChoicePrivat(chatId, "Обрано PrivatBank.");
@@ -132,7 +119,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "NBU✅":
                     bankChoiceMono(chatId, "Обрано MonoBank.");
                     break;
-
                 case "Валюта":
                     if (usdChoice) currencySelectionUSD(chatId, "Обрано USD.");
                     if (eurChoice) currencySelectionEUR(chatId, "Обрано USD і EUR.");
@@ -220,160 +206,43 @@ public class TelegramBot extends TelegramLongPollingBot {
         message.setChatId(String.valueOf(chatId));
 
         Bank bank = new Bank();
+        String alltext = "";
+         String bankC = "";
+         String currency = "";
+         int num = 0;
 
+         if (privatBank){
+             bankC = "privat";
+         } else if (monoBank) {
+             bankC = "mono";
+         }else bankC = "nby";
 
-        if (monoBank && usdChoice && twoAfterPoint){
-            getValSell = bank.getRate("usd", "mono", "sell");
-            doneInfoSell = getValSell.substring(0, getValSell.length() - 2);
+         if (usdChoice){
+             currency = "usd";
+         }else if(eurChoice){
+             currency = "eur";
+         }else currency = "usdAndEur";
 
-            getValBuy = bank.getRate("usd", "mono", "buy");
-            doneInfoBuy = getValBuy;
+         if (twoAfterPoint){
+             num = 5;
+         } else if (threeAfterPoint) {
+             num = 6;
+         }else num = 7;
 
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+         if (bankC.equals("nby")){
+             String getValSell = bank.getRate(currency, bankC, "buy");
+             String doneInfoBuy = getValSell.substring(0, num);
 
-        }else if (monoBank && usdChoice && threeAfterPoint){
-            getValSell = bank.getRate("usd", "mono", "sell");
-            doneInfoSell = getValSell.substring(0, getValSell.length() - 1);
+             alltext = "\n\nКупівля: " + doneInfoBuy;
+         }else {
+             String getValSell = bank.getRate(currency, bankC, "sell");
+             String doneInfoSell = getValSell.substring(0, num);
 
-            getValBuy = bank.getRate("usd", "mono", "buy");
-            doneInfoBuy = getValBuy;
+             String getValBuy = bank.getRate(currency, bankC, "buy");
+             String doneInfoBuy = getValBuy.substring(0, num);
 
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-
-        }else if (monoBank && usdChoice && fourAfterPoint){
-            getValSell = bank.getRate("usd", "mono", "sell");
-            doneInfoSell = getValSell;
-
-            getValBuy = bank.getRate("usd", "mono", "buy");
-            doneInfoBuy = getValBuy;
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else if (monoBank && eurChoice && twoAfterPoint){
-            getValSell = bank.getRate("eur", "mono", "sell");
-            doneInfoSell = getValSell.substring(0, getValSell.length() - 2);
-
-            getValBuy = bank.getRate("eur", "mono", "buy");
-            doneInfoBuy = getValBuy;
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else if (monoBank && eurChoice && threeAfterPoint){
-            getValSell = bank.getRate("eur", "mono", "sell");
-            doneInfoSell = getValSell.substring(0, getValSell.length() - 1);
-
-            getValBuy = bank.getRate("eur", "mono", "buy");
-            doneInfoBuy = getValBuy;
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else if (monoBank && eurChoice && fourAfterPoint){
-            getValSell = bank.getRate("eur", "mono", "sell");
-            doneInfoSell = getValSell;
-
-            getValBuy = bank.getRate("eur", "mono", "buy");
-            doneInfoBuy = getValBuy;
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else if (nBy && usdChoice && twoAfterPoint){
-
-            getValBuy = bank.getRate("usd", "nby", "buy");
-            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 2);
-
-            alltext = "\n\nКупівля: " + doneInfoBuy;
-
-        }else if (nBy && usdChoice && threeAfterPoint){
-
-            getValBuy = bank.getRate("usd", "nby", "buy");
-            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 1);
-
-            alltext = "\n\nКупівля: " + doneInfoBuy;
-
-        }else if (nBy && usdChoice && fourAfterPoint){
-
-            getValBuy = bank.getRate("usd", "nby", "buy");
-            doneInfoBuy = getValBuy;
-
-            alltext = "\n\nКупівля: " + doneInfoBuy;
-
-        }else if (nBy && eurChoice && twoAfterPoint){
-
-            getValBuy = bank.getRate("eur", "nby", "buy");
-            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 2);
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else if (nBy && eurChoice && threeAfterPoint){
-
-            getValBuy = bank.getRate("eur", "nby", "buy");
-            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 1);
-
-            alltext = "\n\nКупівля: " + doneInfoBuy;
-
-        }else if (nBy && eurChoice && fourAfterPoint){
-
-            getValBuy = bank.getRate("eur", "nby", "buy");
-            doneInfoBuy = getValBuy;
-
-            alltext = "\n\nКупівля: " + doneInfoBuy;
-
-        }else if (privatBank && usdChoice && twoAfterPoint){
-            getValSell = bank.getRate("usd", "privat", "sell");
-            doneInfoSell = getValSell.substring(0, getValSell.length() - 3);
-
-            getValBuy = bank.getRate("usd", "privat", "buy");
-            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 3);
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else if (privatBank && usdChoice && threeAfterPoint){
-            getValSell = bank.getRate("usd", "privat", "sell");
-            doneInfoSell = getValSell.substring(0, getValSell.length() - 2);
-
-            getValBuy = bank.getRate("usd", "privat", "buy");
-            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 2);
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else if (privatBank && usdChoice && fourAfterPoint){
-            getValSell = bank.getRate("usd", "privat", "sell");
-            doneInfoSell = getValSell.substring(0, getValSell.length() - 1);
-
-            getValBuy = bank.getRate("usd", "privat", "buy");
-            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 1);
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else if (privatBank && eurChoice && twoAfterPoint){
-            getValSell = bank.getRate("eur", "privat", "sell");
-            doneInfoSell = getValSell.substring(0, getValSell.length() - 3);
-
-            getValBuy = bank.getRate("eur", "privat", "buy");
-            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 3);
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else if (privatBank && eurChoice && threeAfterPoint){
-            getValSell = bank.getRate("eur", "privat", "sell");
-            doneInfoSell = getValSell.substring(0, getValSell.length() - 2);
-
-            getValBuy = bank.getRate("eur", "privat", "buy");
-            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 2);
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else if (privatBank && eurChoice && fourAfterPoint){
-            getValSell = bank.getRate("eur", "privat", "sell");
-            doneInfoSell = getValSell.substring(0, getValSell.length() - 1);
-
-            getValBuy = bank.getRate("eur", "privat", "buy");
-            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 1);
-
-            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-
-        }else sendMessage(chatId, textToSend + "\n\nСкоро виправимо. ❤");
+             alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+         }
 
         sendMessage(chatId, textToSend + alltext);
 
@@ -388,25 +257,25 @@ public class TelegramBot extends TelegramLongPollingBot {
         String num = "";
 
         if (monoBank){
-            bank += "MonoBank";
+            bank = "MonoBank";
         }else if (privatBank){
-            bank += "PrivatBank";
+            bank = "PrivatBank";
         }else
-            bank += "NBU";
+            bank = "NBU";
 
         if (usdChoice){
             currency += "USD";
         }else if (eurChoice){
-            currency += "EUR";
+            currency = "EUR";
         }else
-            currency += "USD і EUR";
+            currency = "USD і EUR";
 
         if (twoAfterPoint){
-            num += "2";
+            num = "2";
         }else if (threeAfterPoint){
-            num += "3";
+            num = "3";
         }else
-            num += "4";
+            num = "4";
 
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
