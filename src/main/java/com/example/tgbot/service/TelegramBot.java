@@ -1,6 +1,7 @@
 package com.example.tgbot.service;
 
 import com.example.tgbot.config.BotConfig;
+import com.example.tgbot.Bank;
 import com.vdurmont.emoji.EmojiParser;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -38,10 +39,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             Для отримання інформації нажміть - \"Отримати інформацію про валюту\". \s
             Для налаштування валюти, банку та часу сповіщення - \"Налаштування\". \s
             Якщо Вам щось не зрозуміло, натисніть будь ласка на - \"Допомога\".""";
-
     static boolean privatBank= false;
     static boolean monoBank = true;
-    static boolean nBU = false;
+    static boolean nBy = false;
 
     static boolean twoAfterPoint = true;
     static boolean threeAfterPoint = false;
@@ -50,6 +50,14 @@ public class TelegramBot extends TelegramLongPollingBot {
     static boolean usdChoice = true;
     static boolean eurChoice = false;
     static boolean usdANDeur = false;
+
+    static String getValSell = "";
+    static String getValBuy = "";
+
+    static String doneInfoSell = "";
+    static String doneInfoBuy = "";
+
+    static String alltext = "";
 
     public TelegramBot(BotConfig config){
         this.config = config;
@@ -92,6 +100,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     settingsMenu(chatId, SETTINGS_TEXT);
                     break;
 
+
+
                 case "Назад":
                     startMenu(chatId, STEP_BACK_TEXT);
                     break;
@@ -102,7 +112,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "Банк":
                     if (monoBank == true) bankChoiceMono(chatId, "Обрано MonoBank.");
                     if (privatBank == true) bankChoicePrivat(chatId, "Обрано PrivatBank.");
-                    if (nBU == true)bankChoiceNBU(chatId, "Обрано PrivatBank");
+                    if (nBy == true)bankChoiceNBU(chatId, "Обрано PrivatBank");
                     break;
                 case "MonoBank":
                     bankChoiceMono(chatId, "Обрано MonoBank.");
@@ -112,6 +122,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
                 case "NBU":
                     bankChoiceNBU(chatId, "Обрано NBU.");
+                    break;
+                case "MonoBank✅":
+                    bankChoicePrivat(chatId, "Обрано PrivatBank.");
+                    break;
+                case "PrivatBank✅":
+                    bankChoiceMono(chatId, "Обрано MonoBank.");
+                    break;
+                case "NBU✅":
+                    bankChoiceMono(chatId, "Обрано MonoBank.");
                     break;
 
                 case "Валюта":
@@ -131,6 +150,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "EUR✅":
                     currencySelectionUSD(chatId,"Обрано USD.");
                     break;
+                    case "Отримати інформацію про валюту":
+                        informationMessage(chatId, "Інформація про вибір:");
+                        getInformationAboutCurrency(chatId, "Курс на даний момент:");
+                        break;
 
                 case "Кількість знаків після коми":
                     if (twoAfterPoint == true)twoNumberAfterPoint(chatId, "Обрано 2 числа після коми.");
@@ -150,6 +173,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "Час сповіщення":
                     notificationTimer(chatId, "Виберіть час для сповіщень.");
                     break;
+
                 default: sendMessage(chatId, "sorry command was not recognised");
             }
         }
@@ -185,6 +209,207 @@ public class TelegramBot extends TelegramLongPollingBot {
         keyboardRows.add(row);
         keyboardMarkup.setKeyboard(keyboardRows);
         message.setReplyMarkup(keyboardMarkup);
+
+        try {
+            execute(message);
+        }catch (TelegramApiException ignored){
+        }
+    }
+    private void getInformationAboutCurrency(long chatId, String textToSend){
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+
+        Bank bank = new Bank();
+
+
+        if (monoBank == true && usdChoice == true && twoAfterPoint == true){
+            getValSell = bank.getRate("usd", "mono", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length() - 2);
+
+            getValBuy = bank.getRate("usd", "mono", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length());
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (monoBank == true && usdChoice == true && threeAfterPoint == true){
+            getValSell = bank.getRate("usd", "mono", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length() - 1);
+
+            getValBuy = bank.getRate("usd", "mono", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length());
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (monoBank == true && usdChoice == true && fourAfterPoint == true){
+            getValSell = bank.getRate("usd", "mono", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length());
+
+            getValBuy = bank.getRate("usd", "mono", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length());
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (monoBank == true && eurChoice == true && twoAfterPoint == true){
+            getValSell = bank.getRate("eur", "mono", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length() - 2);
+
+            getValBuy = bank.getRate("eur", "mono", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length());
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (monoBank == true && eurChoice == true && threeAfterPoint == true){
+            getValSell = bank.getRate("eur", "mono", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length() - 1);
+
+            getValBuy = bank.getRate("eur", "mono", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length());
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (monoBank == true && eurChoice == true && fourAfterPoint == true){
+            getValSell = bank.getRate("eur", "mono", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length());
+
+            getValBuy = bank.getRate("eur", "mono", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length());
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (nBy == true && usdChoice == true && twoAfterPoint == true){
+
+            getValBuy = bank.getRate("usd", "nby", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 2);
+
+            alltext = "\n\nКупівля: " + doneInfoBuy;
+
+        }else if (nBy == true && usdChoice == true && threeAfterPoint == true){
+
+            getValBuy = bank.getRate("usd", "nby", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 1);
+
+            alltext = "\n\nКупівля: " + doneInfoBuy;
+
+        }else if (nBy == true && usdChoice == true && fourAfterPoint == true){
+
+            getValBuy = bank.getRate("usd", "nby", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length());
+
+            alltext = "\n\nКупівля: " + doneInfoBuy;
+
+        }else if (nBy == true && eurChoice == true && twoAfterPoint == true){
+
+            getValBuy = bank.getRate("eur", "nby", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 2);
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (nBy == true && eurChoice == true && threeAfterPoint == true){
+
+            getValBuy = bank.getRate("eur", "nby", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 1);
+
+            alltext = "\n\nКупівля: " + doneInfoBuy;
+
+        }else if (nBy == true && eurChoice == true && fourAfterPoint == true){
+
+            getValBuy = bank.getRate("eur", "nby", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length());
+
+            alltext = "\n\nКупівля: " + doneInfoBuy;
+
+        }else if (privatBank == true && usdChoice == true && twoAfterPoint == true){
+            getValSell = bank.getRate("usd", "privat", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length() - 3);
+
+            getValBuy = bank.getRate("usd", "privat", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 3);
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (privatBank == true && usdChoice == true && threeAfterPoint == true){
+            getValSell = bank.getRate("usd", "privat", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length() - 2);
+
+            getValBuy = bank.getRate("usd", "privat", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 2);
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (privatBank == true && usdChoice == true && fourAfterPoint == true){
+            getValSell = bank.getRate("usd", "privat", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length() - 1);
+
+            getValBuy = bank.getRate("usd", "privat", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 1);
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (privatBank == true && eurChoice == true && twoAfterPoint == true){
+            getValSell = bank.getRate("eur", "privat", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length() - 3);
+
+            getValBuy = bank.getRate("eur", "privat", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 3);
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (privatBank == true && eurChoice == true && threeAfterPoint == true){
+            getValSell = bank.getRate("eur", "privat", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length() - 2);
+
+            getValBuy = bank.getRate("eur", "privat", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 2);
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else if (privatBank == true && eurChoice == true && fourAfterPoint == true){
+            getValSell = bank.getRate("eur", "privat", "sell");
+            doneInfoSell = getValSell.substring(0, getValSell.length() - 1);
+
+            getValBuy = bank.getRate("eur", "privat", "buy");
+            doneInfoBuy = getValBuy.substring(0, getValBuy.length() - 1);
+
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+
+        }else sendMessage(chatId, textToSend + "\n\nСкоро виправимо. ❤");
+
+        sendMessage(chatId, textToSend + alltext);
+
+        try {
+            execute(message);
+        }catch (TelegramApiException ignored){
+        }
+    }
+    private void informationMessage(long chatId, String textToSend){
+        String bank = "";
+        String currency = "";
+        String num = "";
+
+        if (monoBank == true){
+            bank += "MonoBank";
+        }else if (privatBank == true){
+            bank += "PrivatBank";
+        }else
+            bank += "NBU";
+
+        if (usdChoice == true){
+            currency += "USD";
+        }else if (eurChoice == true){
+            currency += "EUR";
+        }else
+            currency += "USD і EUR";
+
+        if (twoAfterPoint == true){
+            num += "2";
+        }else if (threeAfterPoint == true){
+            num += "3";
+        }else
+            num += "4";
+
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(textToSend + "\n\nБанк: " + bank + "\nВалюта: " + currency + "\nК-сть знаків після коми: " + num);
 
         try {
             execute(message);
@@ -312,7 +537,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void bankChoiceMono(long chatId, String textToSend){
         monoBank = true;
         privatBank = false;
-        nBU = false;
+        nBy = false;
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
@@ -342,7 +567,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void bankChoicePrivat(long chatId, String textToSend){
         privatBank = true;
         monoBank = false;
-        nBU = false;
+        nBy = false;
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
@@ -370,7 +595,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
     private void bankChoiceNBU(long chatId, String textToSend){
-        nBU = true;
+        nBy = true;
         privatBank = false;
         monoBank = false;
 
@@ -518,7 +743,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         keyboardRows.add(row);
 
         row = new KeyboardRow();
-        row.add("Вимкнути сповіщення");
+        row.add("Вимкнути сповіщення✅");
         keyboardRows.add(row);
 
         row = new KeyboardRow();
