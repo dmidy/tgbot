@@ -207,48 +207,47 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         Bank bank = new Bank();
         String alltext = "";
-         String bankC = "";
-         String currency = "";
-         int num = 0;
+        String bankC = "";
+        String currency = "";
 
-         if (privatBank){
-             bankC = "privat";
-         } else if (monoBank) {
-             bankC = "mono";
-         }else bankC = "nby";
+        if (privatBank){
+            bankC = "privat";
+        } else if (monoBank) {
+            bankC = "mono";
+        } else {
+            bankC = "nby";
+        }
 
-         if (usdChoice){
-             currency = "usd";
-         }else if(eurChoice){
-             currency = "eur";
-         }else currency = "usdAndEur";
+        if (usdChoice){
+            currency = "usd";
+        } else if(eurChoice){
+            currency = "eur";
+        } else {
+            currency = "usdAndEur";
+        }
 
-         if (twoAfterPoint){
-             num = 5;
-         } else if (threeAfterPoint) {
-             num = 6;
-         }else num = 7;
+        int decimalPlaces = twoAfterPoint ? 2 : (threeAfterPoint ? 3 : 4);
 
-         if (bankC.equals("nby")){
-             String getValSell = bank.getRate(currency, bankC, "buy");
-             String doneInfoBuy = getValSell.substring(0, num);
+        if (bankC.equals("nby")){
+            String getValBuy = bank.getRate(currency, bankC, "buy");
+            String doneInfoBuy = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValBuy));
 
-             alltext = "\n\nКупівля: " + doneInfoBuy;
-         }else {
-             String getValSell = bank.getRate(currency, bankC, "sell");
-             String doneInfoSell = getValSell.substring(0, num);
+            alltext = "\n\nКупівля: " + doneInfoBuy;
+        } else {
+            String getValSell = bank.getRate(currency, bankC, "sell");
+            String doneInfoSell = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValSell));
 
-             String getValBuy = bank.getRate(currency, bankC, "buy");
-             String doneInfoBuy = getValBuy.substring(0, num);
+            String getValBuy = bank.getRate(currency, bankC, "buy");
+            String doneInfoBuy = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValBuy));
 
-             alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-         }
+            alltext = "\n\nПродаж: " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
+        }
 
         sendMessage(chatId, textToSend + alltext);
 
         try {
             execute(message);
-        }catch (TelegramApiException ignored){
+        } catch (TelegramApiException ignored){
         }
     }
     private void informationMessage(long chatId, String textToSend){
