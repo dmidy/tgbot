@@ -20,6 +20,28 @@ import java.util.List;
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     final BotConfig config;
+    public TelegramBot(BotConfig config) {
+        this.config = config;
+        List<BotCommand> listOfCommands = new ArrayList<>();
+        listOfCommands.add(new BotCommand("/start", "get a welcome message"));
+        listOfCommands.add(new BotCommand("/help", "info how to use this bot"));
+        listOfCommands.add(new BotCommand("/settings", "set your preferences"));
+        try {
+            this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String getBotUsername() {
+        return config.getBotName();
+    }
+
+    @Override
+    public String getBotToken() {
+        return config.getToken();
+    }
     static final String HELP_TEXT = """
             This bot is created to demonstrate Spring bot.\s
 
@@ -47,33 +69,10 @@ public class TelegramBot extends TelegramLongPollingBot {
     static boolean threeAfterPoint = false;
     static boolean fourAfterPoint = false;
 
+    static boolean usdANDeur = true;
     static boolean usdChoice = true;
-    static boolean eurChoice = false;
-    static boolean usdANDeur = false;
+    static boolean eurChoice = true;
 
-
-    public TelegramBot(BotConfig config) {
-        this.config = config;
-        List<BotCommand> listOfCommands = new ArrayList<>();
-        listOfCommands.add(new BotCommand("/start", "get a welcome message"));
-        listOfCommands.add(new BotCommand("/help", "info how to use this bot"));
-        listOfCommands.add(new BotCommand("/settings", "set your preferences"));
-        try {
-            this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public String getBotUsername() {
-        return config.getBotName();
-    }
-
-    @Override
-    public String getBotToken() {
-        return config.getToken();
-    }
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -123,21 +122,25 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendBankChoiceMessage(chatId, "Обрано MonoBank.", true, false, false);
                     break;
                 case "Валюта":
-                    if (usdChoice) sendCurrencySelectionMessage(chatId, "Обрано USD.", true, false);
-                    if (eurChoice) sendCurrencySelectionMessage(chatId, "Обрано EUR.", false, true);
-                    if (usdANDeur) sendCurrencySelectionMessage(chatId, "Обрано USD і EUR.", true, true);
+                    if (usdANDeur) {
+                        sendCurrencySelectionMessage(chatId, "Обрано USD і EUR.", true, true, true);
+                    }else if (usdChoice) {
+                        sendCurrencySelectionMessage(chatId, "Обрано USD.", true, false, false);
+                    }
+                    else sendCurrencySelectionMessage(chatId, "Обрано EUR.", false, true, false);
+
                     break;
                 case "EUR":
-                    sendCurrencySelectionMessage(chatId, "Обрано USD і EUR.", true, true);
+                    sendCurrencySelectionMessage(chatId, "Обрано USD і EUR.", true, true, true);
                     break;
                 case "USD":
-                    sendCurrencySelectionMessage(chatId, "Обрано USD і EUR.", true, true);
+                    sendCurrencySelectionMessage(chatId, "Обрано USD і EUR.", true, true, true);
                     break;
                 case "USD✅":
-                    sendCurrencySelectionMessage(chatId, "Обрано EUR.", false, true);
+                    sendCurrencySelectionMessage(chatId, "Обрано EUR.", false, true, false);
                     break;
                 case "EUR✅":
-                    sendCurrencySelectionMessage(chatId, "Обрано USD.", true, false);
+                    sendCurrencySelectionMessage(chatId, "Обрано USD.", true, false, false);
                     break;
                 case "Отримати інформацію про валюту":
                     informationMessage(chatId, "Інформація про вибір:");
@@ -236,30 +239,23 @@ public class TelegramBot extends TelegramLongPollingBot {
         int decimalPlaces = twoAfterPoint ? 2 : (threeAfterPoint ? 3 : 4);
 
         if (bankC.equals("nby")) {
-            if (usdChoice||eurChoice) {
-                String getValBuy = bank.getRate(currency, bankC, "buy");
-                String doneInfoBuyUsd = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValBuy));
-                alltext = "\n\nКупівля USD: " + doneInfoBuyUsd;
-            } else if (usdANDeur) {
+            if (usdANDeur) {
                 String getValBuyUsd = bank.getRate("usd", bankC, "buy");
                 String getValBuyEur = bank.getRate("eur", bankC, "buy");
                 String doneInfoBuyUsd = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValBuyUsd));
                 String doneInfoBuyEur = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValBuyEur));
 
                 alltext = "\n\nКупівля USD: " + doneInfoBuyUsd + "\nКупівля EURO: " + doneInfoBuyEur;
+            }else if (usdChoice||eurChoice) {
+                String getValBuy = bank.getRate(currency, bankC, "buy");
+                String doneInfoBuyUsd = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValBuy));
+                alltext = "\n\nКупівля: " + doneInfoBuyUsd;
             }
 
 
         } else {
 
-            if (usdChoice||eurChoice) {
-                String getValSell = bank.getRate(currency, bankC, "sell");
-                String doneInfoSell = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValSell));
-
-                String getValBuy = bank.getRate(currency, bankC, "buy");
-                String doneInfoBuy = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValBuy));
-                alltext = "\n\nПродаж : " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
-            } else if (usdANDeur) {
+            if (usdANDeur) {
                 String getValSellUsd = bank.getRate("usd", bankC, "sell");
                 String doneInfoSellUsd = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValSellUsd));
 
@@ -276,6 +272,14 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                 alltext = "\n\nПродаж USD: " + doneInfoSellUsd + "\nКупівля USD: " + doneInfoBuyUsd
                         + "\n\nПродаж EURO: " + doneInfoSellEur + "\nКупівля EURO: " + doneInfoBuyEur;
+
+            } else if (usdChoice||eurChoice) {
+                String getValSell = bank.getRate(currency, bankC, "sell");
+                String doneInfoSell = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValSell));
+
+                String getValBuy = bank.getRate(currency, bankC, "buy");
+                String doneInfoBuy = String.format("%." + decimalPlaces + "f", Double.parseDouble(getValBuy));
+                alltext = "\n\nПродаж : " + doneInfoSell + "\nКупівля: " + doneInfoBuy;
             }
 
 
@@ -301,12 +305,12 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else
             bank = "NBU";
 
-        if (usdChoice) {
-            currency += "USD";
+        if (usdANDeur) {
+            currency += "USD і EUR";
         } else if (eurChoice) {
             currency = "EUR";
         } else
-            currency = "USD і EUR";
+            currency = "USD";
 
         if (twoAfterPoint) {
             num = "2";
@@ -356,7 +360,11 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendCurrencySelectionMessage(long chatId, String textToSend, boolean usdSelected, boolean eurSelected) {
+    private void sendCurrencySelectionMessage(long chatId, String textToSend, boolean usdSelected, boolean eurSelected, boolean usdAndEuroSelect) {
+        usdChoice = usdSelected;
+        eurChoice = eurSelected;
+        usdANDeur = usdAndEuroSelect;
+
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
