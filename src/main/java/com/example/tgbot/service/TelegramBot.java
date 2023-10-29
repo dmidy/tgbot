@@ -97,44 +97,44 @@ public class TelegramBot extends TelegramLongPollingBot {
                     settingsMenu(chatId, "🧐");
                     break;
                 case "Банк":
-                    if (monoBank) bankChoiceMono(chatId, "Обрано MonoBank.");
-                    if (privatBank) bankChoicePrivat(chatId, "Обрано PrivatBank.");
-                    if (nBy)bankChoiceNBU(chatId, "Обрано PrivatBank");
+                    if (monoBank) sendBankChoiceMessage(chatId, "Обрано MonoBank.", true, false, false);
+                    if (privatBank) sendBankChoiceMessage(chatId, "Обрано PrivatBank.", false, true, false);
+                    if (nBy)sendBankChoiceMessage(chatId, "Обрано PrivatBank", false, false, true);
                     break;
                 case "MonoBank":
-                    bankChoiceMono(chatId, "Обрано MonoBank.");
+                    sendBankChoiceMessage(chatId, "Обрано MonoBank.", true, false, false);
                     break;
                 case "PrivatBank":
-                    bankChoicePrivat(chatId, "Обрано PrivatBank.");
+                    sendBankChoiceMessage(chatId, "Обрано PrivatBank.", false, true, false);
                     break;
                 case "NBU":
-                    bankChoiceNBU(chatId, "Обрано NBU.");
+                    sendBankChoiceMessage(chatId, "Обрано NBU.", false, false, true);
                     break;
                 case "MonoBank✅":
-                    bankChoicePrivat(chatId, "Обрано PrivatBank.");
+                    sendBankChoiceMessage(chatId, "Обрано PrivatBank.", false, true, false);
                     break;
                 case "PrivatBank✅":
-                    bankChoiceMono(chatId, "Обрано MonoBank.");
+                    sendBankChoiceMessage(chatId, "Обрано MonoBank.", true, false, false);
                     break;
                 case "NBU✅":
-                    bankChoiceMono(chatId, "Обрано MonoBank.");
+                    sendBankChoiceMessage(chatId, "Обрано MonoBank.", true, false, false);
                     break;
                 case "Валюта":
-                    if (usdChoice) currencySelectionUSD(chatId, "Обрано USD.");
-                    if (eurChoice) currencySelectionEUR(chatId, "Обрано USD і EUR.");
-                    if (usdANDeur) currencySelectionUSDandEUR(chatId,"Обрано USD і EUR.");
+                    if (usdChoice) sendCurrencySelectionMessage(chatId, "Обрано USD.", true, false);
+                    if (eurChoice) sendCurrencySelectionMessage(chatId, "Обрано USD і EUR.", true, true);
+                    if (usdANDeur) sendCurrencySelectionMessage(chatId,"Обрано USD і EUR.", true, true);
                     break;
                 case "EUR":
-                    currencySelectionUSDandEUR(chatId, "Обрано USD і EUR.");
+                    sendCurrencySelectionMessage(chatId, "Обрано USD і EUR.", true, true);
                     break;
                 case "USD":
-                    currencySelectionUSDandEUR(chatId, "Обрано USD і EUR.");
+                    sendCurrencySelectionMessage(chatId, "Обрано USD і EUR.", true, true);
                     break;
                 case "USD✅":
-                    currencySelectionEUR(chatId,"Обрано EUR." );
+                    sendCurrencySelectionMessage(chatId,"Обрано EUR." , false, true);
                     break;
                 case "EUR✅":
-                    currencySelectionUSD(chatId,"Обрано USD.");
+                    sendCurrencySelectionMessage(chatId,"Обрано USD.", true, false);
                     break;
                     case "Отримати інформацію про валюту":
                         informationMessage(chatId, "Інформація про вибір:");
@@ -317,10 +317,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }catch (TelegramApiException ignored){
         }
     }
-    private void currencySelectionUSD(long chatId, String textToSend){
-        usdChoice = true;
-        eurChoice = false;
-        usdANDeur = false;
+    private void sendCurrencySelectionMessage(long chatId, String textToSend, boolean usdSelected, boolean eurSelected) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
@@ -329,70 +326,12 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<KeyboardRow> keyboardRows = new ArrayList<>();
 
         KeyboardRow row = new KeyboardRow();
-        row.add("USD✅");
-        row.add("EUR");
+        row.add(usdSelected ? "USD✅" : "USD");
+        row.add(eurSelected ? "EUR✅" : "EUR");
         keyboardRows.add(row);
 
         row = new KeyboardRow();
         row.add("Назад до налаштувань");
-
-        keyboardRows.add(row);
-
-        keyboardMarkup.setKeyboard(keyboardRows);
-        message.setReplyMarkup(keyboardMarkup);
-
-        try {
-            execute(message);
-        } catch (TelegramApiException ignored) {
-        }
-    }
-    private void currencySelectionEUR(long chatId, String textToSend){
-        usdChoice = false;
-        eurChoice = true;
-        usdANDeur = false;
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(textToSend);
-
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-
-        KeyboardRow row = new KeyboardRow();
-        row.add("USD");
-        row.add("EUR✅");
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-        row.add("Назад до налаштувань");
-
-        keyboardRows.add(row);
-
-        keyboardMarkup.setKeyboard(keyboardRows);
-        message.setReplyMarkup(keyboardMarkup);
-
-        try {
-            execute(message);
-        } catch (TelegramApiException ignored) {
-        }
-    }private void currencySelectionUSDandEUR(long chatId, String textToSend){
-        usdChoice = false;
-        eurChoice = false;
-        usdANDeur = true;
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(textToSend);
-
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-
-        KeyboardRow row = new KeyboardRow();
-        row.add("USD✅");
-        row.add("EUR✅");
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-        row.add("Назад до налаштувань");
-
         keyboardRows.add(row);
 
         keyboardMarkup.setKeyboard(keyboardRows);
@@ -404,70 +343,10 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void bankChoiceMono(long chatId, String textToSend){
-        monoBank = true;
-        privatBank = false;
-        nBy = false;
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(textToSend);
-
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-
-        KeyboardRow row = new KeyboardRow();
-        row.add("MonoBank✅");
-        row.add("PrivatBank");
-        row.add("NBU");
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-        row.add("Назад до налаштувань");
-
-        keyboardRows.add(row);
-
-        keyboardMarkup.setKeyboard(keyboardRows);
-        message.setReplyMarkup(keyboardMarkup);
-
-        try {
-            execute(message);
-        }catch (TelegramApiException ignored){
-        }
-    }
-    private void bankChoicePrivat(long chatId, String textToSend){
-        privatBank = true;
-        monoBank = false;
-        nBy = false;
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(textToSend);
-
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-
-        KeyboardRow row = new KeyboardRow();
-        row.add("MonoBank");
-        row.add("PrivatBank✅");
-        row.add("NBU");
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-        row.add("Назад до налаштувань");
-
-        keyboardRows.add(row);
-
-        keyboardMarkup.setKeyboard(keyboardRows);
-        message.setReplyMarkup(keyboardMarkup);
-
-        try {
-            execute(message);
-        }catch (TelegramApiException ignored){
-        }
-    }
-    private void bankChoiceNBU(long chatId, String textToSend){
-        nBy = true;
-        privatBank = false;
-        monoBank = false;
+    private void sendBankChoiceMessage(long chatId, String textToSend, boolean monoSelected, boolean privatSelected, boolean nbuSelected) {
+        monoBank = monoSelected;
+        privatBank = privatSelected;
+        nBy = nbuSelected;
 
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
@@ -477,14 +356,13 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<KeyboardRow> keyboardRows = new ArrayList<>();
 
         KeyboardRow row = new KeyboardRow();
-        row.add("MonoBank");
-        row.add("PrivatBank");
-        row.add("NBU✅");
+        row.add(monoSelected ? "MonoBank✅" : "MonoBank");
+        row.add(privatSelected ? "PrivatBank✅" : "PrivatBank");
+        row.add(nbuSelected ? "NBU✅" : "NBU");
         keyboardRows.add(row);
 
         row = new KeyboardRow();
         row.add("Назад до налаштувань");
-
         keyboardRows.add(row);
 
         keyboardMarkup.setKeyboard(keyboardRows);
@@ -492,7 +370,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         try {
             execute(message);
-        }catch (TelegramApiException ignored){
+        } catch (TelegramApiException ignored) {
         }
     }
     private void sendNumberAfterPoint(long chatId, String textToSend, int numAfterPoint) {
