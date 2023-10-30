@@ -14,11 +14,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     final BotConfig config;
     public TelegramBot(BotConfig config) {
         this.config = config;
@@ -73,12 +76,14 @@ public class TelegramBot extends TelegramLongPollingBot {
     static boolean usdChoice = true;
     static boolean eurChoice = true;
 
+    private boolean notificationsEnabled = false;
+    private int notificationHour = 9;
+
 
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String massageTest = update.getMessage().getText();
-
             long chatId = update.getMessage().getChatId();
 
             switch (massageTest) {
@@ -153,22 +158,74 @@ public class TelegramBot extends TelegramLongPollingBot {
                     if (fourAfterPoint) sendNumberAfterPoint(chatId, "Обрано 4 числа після коми.", 4);
                     break;
                 case "2":
-                    setNumberAfterPoint(chatId, "Обрано 2 числа після коми.", 2); // Для двух чисел после точки
+                    setNumberAfterPoint(chatId, "Обрано 2 числа після коми.", 2);
                     break;
                 case "3":
-                    setNumberAfterPoint(chatId, "Обрано 3 числа після коми.", 3); // Для трех чисел после точки
+                    setNumberAfterPoint(chatId, "Обрано 3 числа після коми.", 3);
                     break;
                 case "4":
-                    setNumberAfterPoint(chatId, "Обрано 4 числа після коми.", 4); // Для четырех чисел после точки
+                    setNumberAfterPoint(chatId, "Обрано 4 числа після коми.", 4);
                     break;
 
                 case "Час сповіщення":
-                    notificationTimer(chatId, "Виберіть час для сповіщень.");
+                    notificationTimer(chatId, "Оберіть час сповіщення");
                     break;
-
+                case "9":
+                    setNotificationHour(chatId, 9);
+                    break;
+                case "10":
+                    setNotificationHour(chatId, 10);
+                    break;
+                case "11":
+                    setNotificationHour(chatId, 11);
+                    break;
+                case "12":
+                    setNotificationHour(chatId, 12);
+                    break;
+                case "13":
+                    setNotificationHour(chatId, 13);
+                    break;
+                case "14":
+                    setNotificationHour(chatId, 14);
+                    break;
+                case "15":
+                    setNotificationHour(chatId, 15);
+                    break;
+                case "16":
+                    setNotificationHour(chatId, 16);
+                    break;
+                case "17":
+                    setNotificationHour(chatId, 17);
+                    break;
+                case "18":
+                    setNotificationHour(chatId, 18);
+                    break;
+                case "Вимкнути сповіщення✅":
+                    toggleNotifications(chatId);
+                    break;
                 default:
-                    sendMessage(chatId, "sorry command was not recognised");
+                    sendMessage(chatId, "Ой, щось не так(");
             }
+        }
+    }
+
+    private void toggleNotifications(long chatId) {
+        notificationsEnabled = !notificationsEnabled;
+
+        if (notificationsEnabled) {
+            sendMessage(chatId, "Автоматичні сповіщення увімкнуті.");
+            // Розмістіть код для автоматичного надсилання сповіщень на зазначену годину.
+        } else {
+            sendMessage(chatId, "Автоматичні сповіщення вимкнуті.");
+        }
+    }
+
+    private void setNotificationHour(long chatId, int hour) {
+        if (hour >= 9 && hour <= 18) {
+            notificationHour = hour;
+            sendMessage(chatId, "Годину для автоматичних сповіщень встановлено на " + hour + ":00.");
+        } else {
+            sendMessage(chatId, "Виберіть годину в діапазоні від 9 до 18.");
         }
     }
 
@@ -211,7 +268,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void getInformationAboutCurrency(long chatId, String textToSend) {
+    protected void getInformationAboutCurrency(long chatId, String textToSend) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
 
@@ -539,5 +596,34 @@ public class TelegramBot extends TelegramLongPollingBot {
         } catch (TelegramApiException ignored) {
         }
     }
+    protected void scheduleNotifications(long chatId, String textToSend, int hour){
+        Runnable sendNotification = () -> {
+            Calendar cal = Calendar.getInstance();
+            int currentHour = cal.get(Calendar.HOUR_OF_DAY);
+            if (currentHour == hour) {
+                getInformationAboutCurrency(chatId, textToSend);
+            }
+        };
+        long initialDelay = calculateDelayToHour(hour);
+        scheduler.scheduleAtFixedRate(sendNotification, initialDelay, 1, TimeUnit.HOURS);
+    }
+    private void scheduleNotificationTime(long chatId, int hour) {
+        if (hour >= 9 && hour <= 18) {
+            String textToSend = "Курс валют на " + hour + ":";
+            scheduleNotifications(chatId, textToSend, hour);
+        } else {
+            sendMessage(chatId, "Виберіть годину в діапазоні від 9 до 18.");
+        }
+    }
+    private long calculateDelayToHour(int targetHour) {
+        Calendar now = Calendar.getInstance();
+        int currentHour = now.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = now.get(Calendar.MINUTE);
 
+        int minutesUntilTarget = (targetHour - currentHour) * 60 - currentMinute;
+        if (minutesUntilTarget < 0) {
+            minutesUntilTarget += 24 * 60;
+        }
+        return TimeUnit.MINUTES.toSeconds(minutesUntilTarget);
+    }
 }
