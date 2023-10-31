@@ -45,36 +45,36 @@ public class TelegramBot extends TelegramLongPollingBot {
     public String getBotToken() {
         return config.getToken();
     }
-    static final String HELP_TEXT = """
+     final String HELP_TEXT = """
             This bot is created to demonstrate Spring bot.\s
 
             You can execute commands from the main menu ont the left or by typing a command:\s
 
             Type /start.
             You will se a welcome message.""";
-    static final String SETTINGS_TEXT = "Будь ласка виберіть параметри, які для вас потрібні.";
-    static final String START_TEXT = """
+     final String SETTINGS_TEXT = "Будь ласка виберіть параметри, які для вас потрібні.";
+     final String START_TEXT = """
             Цей бот призначений для моніторингу за валютой.\s
                         
             Ви можете обрати банк, валюту та зручний для час, коли ми Вас будемо сповіщати про теперішній курс валют за допомогою налаштувань. \s
                         
             Для зручності ми уже обрали стандартні пареметри, тому можете спробувати нажати на кнопку для отримання інформації.""";
 
-    static final String STEP_BACK_TEXT = """
+     final String STEP_BACK_TEXT = """
             Для отримання інформації нажміть - "Отримати інформацію про валюту". \s
             Для налаштування валюти, банку та часу сповіщення - "Налаштування". \s
             Якщо Вам щось не зрозуміло, натисніть будь ласка на - "Допомога".""";
-    static boolean privatBank = false;
-    static boolean monoBank = true;
-    static boolean nBy = false;
+     boolean privatBank = false;
+     boolean monoBank = true;
+     boolean nBy = false;
 
-    static boolean twoAfterPoint = true;
-    static boolean threeAfterPoint = false;
-    static boolean fourAfterPoint = false;
+     boolean twoAfterPoint = true;
+     boolean threeAfterPoint = false;
+     boolean fourAfterPoint = false;
 
-    static boolean usdANDeur = true;
-    static boolean usdChoice = true;
-    static boolean eurChoice = true;
+     boolean usdANDeur = true;
+     boolean usdChoice = true;
+     boolean eurChoice = true;
 
     private boolean notificationsEnabled = false;
     private int notificationHour = 9;
