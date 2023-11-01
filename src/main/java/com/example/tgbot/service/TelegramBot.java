@@ -1,5 +1,6 @@
 package com.example.tgbot.service;
 
+import com.example.tgbot.Timer;
 import com.example.tgbot.config.BotConfig;
 import com.example.tgbot.Bank;
 import com.vdurmont.emoji.EmojiParser;
@@ -15,13 +16,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     final BotConfig config;
     public TelegramBot(BotConfig config) {
         this.config = config;
@@ -45,39 +43,39 @@ public class TelegramBot extends TelegramLongPollingBot {
     public String getBotToken() {
         return config.getToken();
     }
-     final String HELP_TEXT = """
+    final String HELP_TEXT = """
             This bot is created to demonstrate Spring bot.\s
 
             You can execute commands from the main menu ont the left or by typing a command:\s
 
             Type /start.
             You will se a welcome message.""";
-     final String SETTINGS_TEXT = "Будь ласка виберіть параметри, які для вас потрібні.";
-     final String START_TEXT = """
+    final String SETTINGS_TEXT = "Будь ласка виберіть параметри, які для вас потрібні.";
+    final String START_TEXT = """
             Цей бот призначений для моніторингу за валютой.\s
                         
             Ви можете обрати банк, валюту та зручний для час, коли ми Вас будемо сповіщати про теперішній курс валют за допомогою налаштувань. \s
                         
             Для зручності ми уже обрали стандартні пареметри, тому можете спробувати нажати на кнопку для отримання інформації.""";
 
-     final String STEP_BACK_TEXT = """
+    final String STEP_BACK_TEXT = """
             Для отримання інформації нажміть - "Отримати інформацію про валюту". \s
             Для налаштування валюти, банку та часу сповіщення - "Налаштування". \s
             Якщо Вам щось не зрозуміло, натисніть будь ласка на - "Допомога".""";
-     boolean privatBank = false;
-     boolean monoBank = true;
-     boolean nBy = false;
+    boolean privatBank = false;
+    boolean monoBank = true;
+    boolean nBy = false;
 
-     boolean twoAfterPoint = true;
-     boolean threeAfterPoint = false;
-     boolean fourAfterPoint = false;
+    boolean twoAfterPoint = true;
+    boolean threeAfterPoint = false;
+    boolean fourAfterPoint = false;
 
-     boolean usdANDeur = true;
-     boolean usdChoice = true;
-     boolean eurChoice = true;
+    boolean usdANDeur = true;
+    boolean usdChoice = true;
+    boolean eurChoice = true;
 
     private boolean notificationsEnabled = false;
-    private int notificationHour = 9;
+    private Integer notificationHour = null;
 
 
     @Override
@@ -204,7 +202,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     toggleNotifications(chatId);
                     break;
                 default:
-                    sendMessage(chatId, "Ой, щось не так(");
+                    sendMessage(chatId, "Ой, щось не так");
             }
         }
     }
@@ -212,9 +210,11 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void toggleNotifications(long chatId) {
         notificationsEnabled = !notificationsEnabled;
 
-        if (notificationsEnabled) {
+        if (true) {
             sendMessage(chatId, "Автоматичні сповіщення увімкнуті.");
-            // Розмістіть код для автоматичного надсилання сповіщень на зазначену годину.
+            Timer timer = new Timer();
+            getInformationAboutCurrency(chatId, "Курс на даний момент:");
+            timer.sendScheduledMessageAtNoon(chatId,"alltext",14,53);
         } else {
             sendMessage(chatId, "Автоматичні сповіщення вимкнуті.");
         }
@@ -267,13 +267,13 @@ public class TelegramBot extends TelegramLongPollingBot {
         } catch (TelegramApiException ignored) {
         }
     }
-
+    String alltext;
     protected void getInformationAboutCurrency(long chatId, String textToSend) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
 
         Bank bank = new Bank();
-        String alltext = "";
+        alltext = "";
         String bankC = "";
         String currency = "";
 
@@ -595,35 +595,5 @@ public class TelegramBot extends TelegramLongPollingBot {
             execute(message);
         } catch (TelegramApiException ignored) {
         }
-    }
-    protected void scheduleNotifications(long chatId, String textToSend, int hour){
-        Runnable sendNotification = () -> {
-            Calendar cal = Calendar.getInstance();
-            int currentHour = cal.get(Calendar.HOUR_OF_DAY);
-            if (currentHour == hour) {
-                getInformationAboutCurrency(chatId, textToSend);
-            }
-        };
-        long initialDelay = calculateDelayToHour(hour);
-        scheduler.scheduleAtFixedRate(sendNotification, initialDelay, 1, TimeUnit.HOURS);
-    }
-    private void scheduleNotificationTime(long chatId, int hour) {
-        if (hour >= 9 && hour <= 18) {
-            String textToSend = "Курс валют на " + hour + ":";
-            scheduleNotifications(chatId, textToSend, hour);
-        } else {
-            sendMessage(chatId, "Виберіть годину в діапазоні від 9 до 18.");
-        }
-    }
-    private long calculateDelayToHour(int targetHour) {
-        Calendar now = Calendar.getInstance();
-        int currentHour = now.get(Calendar.HOUR_OF_DAY);
-        int currentMinute = now.get(Calendar.MINUTE);
-
-        int minutesUntilTarget = (targetHour - currentHour) * 60 - currentMinute;
-        if (minutesUntilTarget < 0) {
-            minutesUntilTarget += 24 * 60;
-        }
-        return TimeUnit.MINUTES.toSeconds(minutesUntilTarget);
     }
 }
