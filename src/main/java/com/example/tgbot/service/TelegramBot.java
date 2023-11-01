@@ -73,8 +73,19 @@ public class TelegramBot extends TelegramLongPollingBot {
     boolean usdANDeur = true;
     boolean usdChoice = true;
     boolean eurChoice = true;
+    boolean nine = false;
+    boolean ten = false;
+    boolean eleven = false;
+    boolean twelve = false;
+    boolean thirteen = false;
+    boolean fourteen = false;
+    boolean fifteen = false;
+    boolean sixteen = false;
+    boolean seventeen = false;
+    boolean eighteen = false;
 
-    private boolean notificationsEnabled = false;
+    boolean notificationsEnabled = true;
+
     private Integer notificationHour = null;
 
 
@@ -166,39 +177,67 @@ public class TelegramBot extends TelegramLongPollingBot {
                     break;
 
                 case "Час сповіщення":
-                    notificationTimer(chatId, "Оберіть час сповіщення");
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,false,false,
+                            false,false,false,false,false,false, true);
                     break;
                 case "9":
                     setNotificationHour(chatId, 9);
+                    notificationTimer(chatId, "Оберіть час сповіщення", true,false,false,false,
+                            false,false,false,false,false,false, false);
                     break;
                 case "10":
                     setNotificationHour(chatId, 10);
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,true,false,false,
+                            false,false,false,false,false,false, false);
                     break;
                 case "11":
                     setNotificationHour(chatId, 11);
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,true,false,
+                            false,false,false,false,false,false, false);
                     break;
                 case "12":
                     setNotificationHour(chatId, 12);
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,false,true,
+                            false,false,false,false,false,false, false);
                     break;
                 case "13":
                     setNotificationHour(chatId, 13);
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,false,false,
+                            true,false,false,false,false,false, false);
                     break;
                 case "14":
                     setNotificationHour(chatId, 14);
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,false,false,
+                            false,true,false,false,false,false, false);
                     break;
                 case "15":
                     setNotificationHour(chatId, 15);
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,false,false,
+                            false,false,true,false,false,false, false);
                     break;
                 case "16":
                     setNotificationHour(chatId, 16);
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,false,false,
+                            false,false,false,true,false,false, false);
                     break;
                 case "17":
                     setNotificationHour(chatId, 17);
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,false,false,
+                            false,false,false,false,true,false, false);
                     break;
                 case "18":
                     setNotificationHour(chatId, 18);
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,false,false,
+                            false,false,false,false,false,true, false);
                     break;
                 case "Вимкнути сповіщення✅":
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,false,false,
+                            false,false,false,false,false,false, false);
+                    toggleNotifications(chatId);
+                    break;
+                case "Вимкнути сповіщення":
+                    notificationTimer(chatId, "Оберіть час сповіщення", false,false,false,false,
+                            false,false,false,false,false,false, true);
                     toggleNotifications(chatId);
                     break;
                 default:
@@ -210,7 +249,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void toggleNotifications(long chatId) {
         notificationsEnabled = !notificationsEnabled;
 
-        if (true) {
+        if (notificationsEnabled) {
             sendMessage(chatId, "Автоматичні сповіщення увімкнуті.");
             Timer timer = new Timer();
             getInformationAboutCurrency(chatId, "Курс на даний момент:");
@@ -556,32 +595,44 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void notificationTimer(long chatId, String textToSend) {
+    private void notificationTimer(long chatId, String textToSend,
+                                   boolean nineC, boolean tenC, boolean elevenC, boolean twelveC, boolean thirteenC,
+                                   boolean fourteenC, boolean fifteenC, boolean sixteenC, boolean seventeenC, boolean eighteenC, boolean notificationsEnabledC) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
-
+        notificationsEnabled = notificationsEnabledC;
+        nine = nineC;
+        ten =tenC;
+        eleven = elevenC;
+        twelve = twelveC;
+        thirteen = thirteenC;
+        fourteen = fourteenC;
+        fifteen = fifteenC;
+        sixteen= sixteenC;
+        seventeen = seventeenC;
+        eighteen = eighteenC;
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows = new ArrayList<>();
 
         KeyboardRow row = new KeyboardRow();
-        row.add("9");
-        row.add("10");
-        row.add("11");
-        row.add("12");
-        row.add("13");
+        row.add("9" + (nine ? "✅" : ""));
+        row.add("10" +(ten ? "✅" : ""));
+        row.add("11" +(eleven  ? "✅" : ""));
+        row.add("12" +(twelve  ? "✅" : ""));
+        row.add("13" +(thirteen  ? "✅" : ""));
         keyboardRows.add(row);
 
         row = new KeyboardRow();
-        row.add("14");
-        row.add("15");
-        row.add("16");
-        row.add("17");
-        row.add("18");
+        row.add("14" +(fourteen  ? "✅" : ""));
+        row.add("15" +(fifteen  ? "✅" : ""));
+        row.add("16" +(sixteen  ? "✅" : ""));
+        row.add("17" +(seventeen  ? "✅" : ""));
+        row.add("18" +(eighteen  ? "✅" : ""));
         keyboardRows.add(row);
 
         row = new KeyboardRow();
-        row.add("Вимкнути сповіщення✅");
+        row.add("Вимкнути сповіщення" + (notificationsEnabledC ? "✅" : ""));
         keyboardRows.add(row);
 
         row = new KeyboardRow();
